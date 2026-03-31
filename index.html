@@ -1,0 +1,219 @@
+<!--
+README:
+Interactive DOM Traversal and Manipulation
+This webpage displays a three-level hierarchy (grandparent > parent > child)
+and provides buttons to traverse and manipulate nodes. Users can select nodes,
+highlight them, move up/down/sibling, add children, and delete nodes with restrictions.
+All CSS and JavaScript are embedded in this single file.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Interactive DOM Traversal and Manipulation</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #f5f5f5;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: #ff8c00;
+      color: #000;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      margin: 0;
+    }
+    .grandparent {
+      background-color: #2e2e2e;
+      padding: 20px;
+      margin: 20px;
+      border-radius: 8px;
+    }
+    .parent {
+      background-color: #3e3e3e;
+      padding: 15px;
+      margin: 10px;
+      border-radius: 6px;
+    }
+    .child {
+      background-color: #4e4e4e;
+      padding: 10px;
+      margin: 5px;
+      border-radius: 4px;
+    }
+    .highlight {
+      border: 2px solid #ff8c00;
+      background-color: #555555 !important;
+    }
+    .controls {
+      text-align: center;
+      margin: 20px;
+    }
+    button {
+      margin: 5px;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      background-color: #ff8c00;
+      color: #000;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #ffa733;
+    }
+  </style>
+</head>
+<body>
+  <!-- Profile Header -->
+  <header>
+    <h1>Student Profile</h1>
+    <p><strong>Complete Name:</strong> Mark Emil D. Sola</p>
+    <p><strong>Sex:</strong> Male</p>
+    <p><strong>Address:</strong> Camagong, San Jose, Camarines Sur</p>
+    <p><strong>Course, Year & Section:</strong> BSIT-2D</p>
+    <p><strong>Name of School:</strong> Partido State University</p>
+    <p><strong>Semester & Academic Year:</strong> 2nd Semester, AY 2025–2026</p>
+    <p><strong>Subject Code & Title:</strong> PF2 - Event Driven Programming</p>
+    <p><strong>Instructor:</strong> Arjay F. Abio</p>
+  </header>
+
+  <!-- Hierarchy -->
+  <div class="grandparent" id="grandparent">
+    Grandparent
+    <div class="parent">Parent 1
+      <div class="child">Child 1A</div>
+      <div class="child">Child 1B</div>
+    </div>
+    <div class="parent">Parent 2
+      <div class="child">Child 2A</div>
+      <div class="child">Child 2B</div>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <button id="downBtn">Traverse Down</button>
+    <button id="upBtn">Traverse Up</button>
+    <button id="nextBtn">Next Sibling</button>
+    <button id="prevBtn">Previous Sibling</button>
+    <button id="addBtn">Add Child</button>
+    <button id="deleteBtn">Delete Current</button>
+  </div>
+
+  <script>
+    // Track currently selected node
+    let selectedNode = null;
+
+    // Function to highlight selected node
+    function selectNode(node) {
+      if (selectedNode) {
+        selectedNode.classList.remove("highlight");
+      }
+      selectedNode = node;
+      selectedNode.classList.add("highlight");
+    }
+
+    // Add click listeners to all nodes
+    document.querySelectorAll(".grandparent, .parent, .child").forEach(node => {
+      node.addEventListener("click", function(event) {
+        event.stopPropagation(); // Prevent bubbling
+        selectNode(this);
+      });
+    });
+
+    // Traverse Down: first child
+    document.getElementById("downBtn").addEventListener("click", () => {
+      if (selectedNode && selectedNode.firstElementChild) {
+        selectNode(selectedNode.firstElementChild);
+      } else {
+        alert("No child node available.");
+      }
+    });
+
+    // Traverse Up: parent node
+    document.getElementById("upBtn").addEventListener("click", () => {
+      if (selectedNode && selectedNode.parentElement && selectedNode.parentElement.classList.contains("grandparent") || selectedNode.parentElement.classList.contains("parent")) {
+        selectNode(selectedNode.parentElement);
+      } else {
+        alert("No parent node available.");
+      }
+    });
+
+    // Next Sibling
+    document.getElementById("nextBtn").addEventListener("click", () => {
+      if (selectedNode && selectedNode.nextElementSibling) {
+        selectNode(selectedNode.nextElementSibling);
+      } else {
+        alert("No next sibling available.");
+      }
+    });
+
+    // Previous Sibling
+    document.getElementById("prevBtn").addEventListener("click", () => {
+      if (selectedNode && selectedNode.previousElementSibling) {
+        selectNode(selectedNode.previousElementSibling);
+      } else {
+        alert("No previous sibling available.");
+      }
+    });
+
+    // Add Child
+    document.getElementById("addBtn").addEventListener("click", () => {
+      if (!selectedNode) {
+        alert("Select a node first.");
+        return;
+      }
+      if (selectedNode.classList.contains("grandparent")) {
+        // Add new parent with two children
+        let newParent = document.createElement("div");
+        newParent.className = "parent";
+        newParent.textContent = "New Parent";
+        let child1 = document.createElement("div");
+        child1.className = "child";
+        child1.textContent = "New Child A";
+        let child2 = document.createElement("div");
+        child2.className = "child";
+        child2.textContent = "New Child B";
+        newParent.appendChild(child1);
+        newParent.appendChild(child2);
+        selectedNode.appendChild(newParent);
+        // Add click listeners
+        newParent.addEventListener("click", e => { e.stopPropagation(); selectNode(newParent); });
+        child1.addEventListener("click", e => { e.stopPropagation(); selectNode(child1); });
+        child2.addEventListener("click", e => { e.stopPropagation(); selectNode(child2); });
+      } else if (selectedNode.classList.contains("parent")) {
+        // Add new child
+        let newChild = document.createElement("div");
+        newChild.className = "child";
+        newChild.textContent = "New Child";
+        selectedNode.appendChild(newChild);
+        newChild.addEventListener("click", e => { e.stopPropagation(); selectNode(newChild); });
+      } else {
+        alert("Cannot add child to a child node.");
+      }
+    });
+
+    // Delete Current
+    document.getElementById("deleteBtn").addEventListener("click", () => {
+      if (!selectedNode) {
+        alert("Select a node first.");
+        return;
+      }
+      if (selectedNode.classList.contains("grandparent")) {
+        alert("Cannot delete the grandparent node.");
+      } else {
+        let parent = selectedNode.parentElement;
+        parent.removeChild(selectedNode);
+        selectedNode = null;
+      }
+    });
+  </script>
+</body>
+</html>
